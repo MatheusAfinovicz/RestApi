@@ -1,12 +1,15 @@
+import { request } from 'express';
 import User from '../models/User';
 
 class UserController {
   async create(req, res) {
-    const newUser = await User.create({
-      email: 'teste2@teste.com',
-      password: 'testando',
-    });
-    res.json(newUser);
+    try {
+      console.log(request.body);
+      const newUser = await User.create(req.body);
+      res.json(newUser);
+    } catch (e) {
+      res.status(400).json({ errors: e.errors.map((err) => err.message) });
+    }
   }
 }
 
