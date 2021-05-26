@@ -35,13 +35,14 @@ class UserController {
 
   async update(req, res) {
     try {
-      if (!req.params.id) {
+      const { email } = req.params;
+
+      if (!email) {
         return res.status(400).json({
-          errors: ['Missing ID'],
+          errors: ['Missing email'],
         });
       }
-
-      const user = await User.findByPk(req.params.id);
+      const user = await User.findOne({ where: { email } });
 
       if (!user) {
         return res.status(400).json({
@@ -61,20 +62,22 @@ class UserController {
 
   async delete(req, res) {
     try {
-      if (!req.params.id) {
+      const { email } = req.params;
+
+      if (!email) {
         return res.status(400).json({
-          errors: ['Missing ID'],
+          errors: ['Missing email'],
         });
       }
 
-      const user = await User.findByPk(req.params.id);
+      const user = await User.findOne({ where: { email } });
 
-      if (user) {
-        res.json({ sucess: 'User deleted' });
-        user.destroy();
+      if (!user) {
+        return res.status(400).json({ errors: ['User not found'] });
       }
 
-      return res.status(400).json({ errors: ['User not found'] });
+      user.destroy();
+      return res.json({ sucess: 'User deleted' });
     } catch (e) {
       return res.status(400).json({
         errors: e.errors.map((err) => err.message),
