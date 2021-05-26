@@ -1,7 +1,7 @@
 import Book from '../models/Book';
 
 class HomeController {
-  async index(req, res) {
+  async create(req, res) {
     try {
       const {
         name = '', serie = '', volume = '', author = '', publishedAt = '', pages = '',
