@@ -1,6 +1,16 @@
 import Book from '../models/Book';
 
 class HomeController {
+  async index(req, res) {
+    try {
+      const books = await Book.findAll();
+
+      return res.json({ books });
+    } catch (e) {
+      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+    }
+  }
+
   async create(req, res) {
     try {
       const {
