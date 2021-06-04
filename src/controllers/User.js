@@ -3,19 +3,25 @@ import User from '../models/User';
 class UserController {
   async show(req, res) {
     try {
-      if (!req.params.id) {
-        return res.status(400).json({
-          errors: ['Missing ID'],
-        });
-      }
+      const queryParams = { ...req.query };
 
-      const user = await User.findByPk(req.params.id);
+      const validQueries = ['id', 'email'];
+      const paramsKeys = Object.keys(queryParams);
 
-      if (user) {
-        return res.json({ user });
-      }
+      paramsKeys.forEach((key) => {
+        if (!(validQueries.includes(key))) {
+          return res.status(400).json({
+            errors: ['Invalid query params'],
+          });
+        }
+      });
 
-      return res.status(400).json({ errors: ['User not found'] });
+      const users = await User.findAll({
+        where: queryParams,
+        attributes: ['id', 'email', 'created_at'],
+      });
+
+      return res.json({ users });
     } catch (e) {
       return res.status(400).json({
         errors: e.errors.map((err) => err.message),
@@ -27,7 +33,9 @@ class UserController {
     try {
       const newUser = await User.create(req.body);
 
-      return res.json({ sucess: newUser });
+      const { id, email } = newUser;
+
+      return res.json({ id, email });
     } catch (e) {
       return res.status(400).json({ errors: e.errors.map((err) => err.message) });
     }
@@ -35,14 +43,9 @@ class UserController {
 
   async update(req, res) {
     try {
-      const { email } = req.params;
+      const id = req.userId;
 
-      if (!email) {
-        return res.status(400).json({
-          errors: ['Missing email'],
-        });
-      }
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { id } });
 
       if (!user) {
         return res.status(400).json({
@@ -50,9 +53,10 @@ class UserController {
         });
       }
 
-      const newUser = await user.update(req.body);
+      const updatedUser = await user.update(req.body);
+      const { email } = updatedUser;
 
-      return res.json({ sucess: newUser });
+      return res.json({ id, email });
     } catch (e) {
       return res.status(400).json({
         errors: e.errors.map((err) => err.message),
@@ -62,22 +66,18 @@ class UserController {
 
   async delete(req, res) {
     try {
-      const { email } = req.params;
+      const id = req.userId;
 
-      if (!email) {
-        return res.status(400).json({
-          errors: ['Missing email'],
-        });
-      }
-
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { id } });
 
       if (!user) {
         return res.status(400).json({ errors: ['User not found'] });
       }
 
+      const email = req.userEmail;
+
       user.destroy();
-      return res.json({ sucess: 'User deleted' });
+      return res.json({ 'User deleted': { id, email } });
     } catch (e) {
       return res.status(400).json({
         errors: e.errors.map((err) => err.message),
