@@ -3,12 +3,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
-import './src/database';
+import './database';
 
-import homeRoutes from './src/routes/home';
-import userRoutes from './src/routes/user';
-import tokenRoutes from './src/routes/token';
-import bookRoutes from './src/routes/book';
+import homeRoutes from './routes/home';
+import userRoutes from './routes/user';
+import tokenRoutes from './routes/token';
+import bookRoutes from './routes/book';
 
 class App {
   constructor() {
