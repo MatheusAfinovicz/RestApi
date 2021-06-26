@@ -1,12 +1,12 @@
 import Book from '../models/Book';
 
 class BookController {
-  async show(req, res) {
+  async index(req, res) {
     try {
       const queryParams = { ...req.query };
 
       if (Object.keys(queryParams).length !== 0) {
-        const validQueries = ['name', 'serie', 'volume', 'author', 'published_at', 'pages'];
+        const validQueries = ['id', 'name', 'serie', 'volume', 'author', 'published_at', 'pages'];
         const paramsQueries = Object.keys(queryParams);
 
         paramsQueries.forEach((key) => {
@@ -30,13 +30,41 @@ class BookController {
 
         return res.json({ books });
       }
-      const validQueries = ['name', 'serie', 'volume', 'author', 'published_at', 'pages'];
+      const validQueries = ['id', 'name', 'serie', 'volume', 'author', 'published_at', 'pages'];
 
       const books = await Book.findAll({
         attributes: validQueries,
       });
 
       return res.json({ books });
+    } catch (e) {
+      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+    }
+  }
+
+  async show(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({ errors: ['Missing required id'] });
+      }
+
+      const book = await Book.findByPk(id);
+
+      if (!book) {
+        return res.status(404).json({ errors: ['No books found with the requested id'] });
+      }
+
+      const {
+        name, serie, volume, author, published_at, pages,
+      } = book;
+
+      return res.json({
+        books: [{
+          id, name, serie, volume, author, published_at, pages,
+        }],
+      });
     } catch (e) {
       return res.status(400).json({ errors: e.errors.map((err) => err.message) });
     }
@@ -87,54 +115,28 @@ class BookController {
 
   async update(req, res) {
     try {
-      const queryParams = { ...req.query };
+      const { id } = req.params;
 
-      if (Object.keys(queryParams).length !== 0) {
-        const validQueries = ['name', 'serie', 'volume', 'author', 'published_at', 'pages'];
-        const paramsQueries = Object.keys(queryParams);
-
-        paramsQueries.forEach((key) => {
-          if (!(validQueries.includes(key))) {
-            return res.status(400).json({
-              errors: ['Invalid query params'],
-            });
-          }
-        });
-
-        const books = await Book.findAll({
-          where: queryParams,
-          attributes: validQueries,
-        });
-
-        if (books.length > 1) {
-          return res.status(400).json({
-            errors: ['More than one book found with the requested params', { books }],
-          });
-        }
-
-        if (books.length === 0) {
-          return res.status(404).json({
-            errors: ['No books found with the requested params'],
-          });
-        }
-
-        const book = await Book.findOne({
-          where: queryParams,
-        });
-
-        const updatedBook = await book.update(req.body);
-        const {
-          name, serie, volume, author, published_at, pages,
-        } = updatedBook;
-
-        return res.json({
-          'Book updated': {
-            name, serie, volume, author, published_at, pages,
-          },
-        });
+      if (!id) {
+        return res.status(400).json({ errors: ['Missing required id'] });
       }
-      return res.status(400).json({
-        errors: ['No query params found, be more specific'],
+
+      const book = await Book.findByPk(id);
+
+      if (!book) {
+        return res.status(404).json({ errors: ['No books found with the requested id'] });
+      }
+
+      const updatedBook = await book.update(req.body);
+
+      const {
+        name, serie, volume, author, published_at, pages,
+      } = updatedBook;
+
+      return res.json({
+        updated: [{
+          id, name, serie, volume, author, published_at, pages,
+        }],
       });
     } catch (e) {
       return res.status(400).json({ errors: e.errors.map((err) => err.message) });
@@ -143,47 +145,28 @@ class BookController {
 
   async delete(req, res) {
     try {
-      const queryParams = { ...req.query };
+      const { id } = req.params;
 
-      if (Object.keys(queryParams).length !== 0) {
-        const validQueries = ['name', 'serie', 'volume', 'author', 'published_at', 'pages'];
-        const paramsQueries = Object.keys(queryParams);
-
-        paramsQueries.forEach((key) => {
-          if (!(validQueries.includes(key))) {
-            return res.status(400).json({
-              errors: ['Invalid query params'],
-            });
-          }
-        });
-
-        const books = await Book.findAll({
-          where: queryParams,
-          attributes: validQueries,
-        });
-
-        if (books.length > 1) {
-          return res.status(400).json({
-            errors: ['More than one book found with the requested params', { books }],
-          });
-        }
-
-        if (books.length === 1) {
-          return res.status(404).json({
-            errors: ['No books found with the requested params'],
-          });
-        }
-
-        const book = await Book.findOne({
-          where: queryParams,
-        });
-
-        book.destroy();
-
-        return res.json({ 'Book deleted': books });
+      if (!id) {
+        return res.status(400).json({ errors: ['Missing required id'] });
       }
-      return res.status(400).json({
-        errors: ['No query params found, be more specific'],
+
+      const book = await Book.findByPk(id);
+
+      if (!book) {
+        return res.status(404).json({ errors: ['No books found with the requested id'] });
+      }
+
+      const {
+        name, serie, volume, author, published_at, pages,
+      } = book;
+
+      book.destroy();
+
+      return res.json({
+        deleted: [{
+          id, name, serie, volume, author, published_at, pages,
+        }],
       });
     } catch (e) {
       return res.status(400).json({ errors: e.errors.map((err) => err.message) });
