@@ -1,7 +1,8 @@
+import { Request, Response } from 'express';
 import Book from '../models/Book';
 
 class BookController {
-  async index(req, res) {
+  async index(req: Request, res: Response) {
     try {
       const queryParams = { ...req.query };
 
@@ -38,11 +39,11 @@ class BookController {
 
       return res.json({ books });
     } catch (e) {
-      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+      return res.status(400).json({ errors: e.errors.map((err: Error) => err.message) });
     }
   }
 
-  async show(req, res) {
+  async show(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
@@ -50,27 +51,27 @@ class BookController {
         return res.status(400).json({ errors: ['Missing required id'] });
       }
 
-      const book = await Book.findByPk(id);
+      const validQueries = ['id', 'name', 'serie', 'volume', 'author', 'published_at', 'pages'];
+
+      const book = await Book.findByPk(id, {
+        attributes: validQueries,
+      });
 
       if (!book) {
         return res.status(404).json({ errors: ['No books found with the requested id'] });
       }
 
-      const {
-        name, serie, volume, author, published_at, pages,
-      } = book;
-
       return res.json({
         books: [{
-          id, name, serie, volume, author, published_at, pages,
+          book,
         }],
       });
     } catch (e) {
-      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+      return res.status(400).json({ errors: e.errors.map((err: Error) => err.message) });
     }
   }
 
-  async create(req, res) {
+  async create(req: Request, res: Response) {
     try {
       const {
         name = '', serie = '', volume = '', author = '', published_at = '', pages = '',
@@ -109,11 +110,11 @@ class BookController {
         },
       });
     } catch (e) {
-      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+      return res.status(400).json({ errors: e.errors.map((err: Error) => err.message) });
     }
   }
 
-  async update(req, res) {
+  async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
@@ -129,21 +130,17 @@ class BookController {
 
       const updatedBook = await book.update(req.body);
 
-      const {
-        name, serie, volume, author, published_at, pages,
-      } = updatedBook;
-
       return res.json({
         updated: [{
-          id, name, serie, volume, author, published_at, pages,
+          updatedBook
         }],
       });
     } catch (e) {
-      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+      return res.status(400).json({ errors: e.errors.map((err: Error) => err.message) });
     }
   }
 
-  async delete(req, res) {
+  async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
@@ -151,25 +148,25 @@ class BookController {
         return res.status(400).json({ errors: ['Missing required id'] });
       }
 
-      const book = await Book.findByPk(id);
+      const validQueries = ['id', 'name', 'serie', 'volume', 'author', 'published_at', 'pages'];
+
+      const book = await Book.findByPk(id, {
+        attributes: validQueries,
+      });
 
       if (!book) {
         return res.status(404).json({ errors: ['No books found with the requested id'] });
       }
 
-      const {
-        name, serie, volume, author, published_at, pages,
-      } = book;
-
       book.destroy();
 
       return res.json({
         deleted: [{
-          id, name, serie, volume, author, published_at, pages,
+          book
         }],
       });
     } catch (e) {
-      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+      return res.status(400).json({ errors: e.errors.map((err: Error) => err.message) });
     }
   }
 }

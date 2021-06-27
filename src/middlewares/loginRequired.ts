@@ -32,6 +32,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
+    req.user = {
+      id,
+      email
+    }
+
     return next();
   } catch (e) {
     return res.status(401).json({
