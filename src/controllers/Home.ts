@@ -1,5 +1,7 @@
+import { Request, Response } from 'express';
+
 class HomeController {
-  index(req, res) {
+  index(req: Request, res: Response) {
     return res.json(
       {
         'Welcome to my library!':

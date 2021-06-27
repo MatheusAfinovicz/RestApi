@@ -1,7 +1,9 @@
 import User from '../models/User';
+import { Request, Response } from 'express';
+
 
 class UserController {
-  async show(req, res) {
+  async show(req: Request, res: Response) {
     try {
       const queryParams = { ...req.query };
 
@@ -24,12 +26,12 @@ class UserController {
       return res.json({ users });
     } catch (e) {
       return res.status(400).json({
-        errors: e.errors.map((err) => err.message),
+        errors: e.errors.map((err: Error) => err.message),
       });
     }
   }
 
-  async create(req, res) {
+  async create(req: Request, res: Response) {
     try {
       const newUser = await User.create(req.body);
 
@@ -37,13 +39,13 @@ class UserController {
 
       return res.json({ id, email });
     } catch (e) {
-      return res.status(400).json({ errors: e.errors.map((err) => err.message) });
+      return res.status(400).json({ errors: e.errors.map((err: Error) => err.message) });
     }
   }
 
-  async update(req, res) {
+  async update(req: Request, res: Response) {
     try {
-      const id = req.userId;
+      const id = req.user.id;
 
       const user = await User.findOne({ where: { id } });
 
@@ -54,19 +56,19 @@ class UserController {
       }
 
       const updatedUser = await user.update(req.body);
-      const { email } = updatedUser;
+      const { email } = updatedUser._attributes;
 
       return res.json({ id, email });
     } catch (e) {
       return res.status(400).json({
-        errors: e.errors.map((err) => err.message),
+        errors: e.errors.map((err: Error) => err.message),
       });
     }
   }
 
-  async delete(req, res) {
+  async delete(req: Request, res: Response) {
     try {
-      const id = req.userId;
+      const id = req.user.id;
 
       const user = await User.findOne({ where: { id } });
 
@@ -74,13 +76,13 @@ class UserController {
         return res.status(400).json({ errors: ['User not found'] });
       }
 
-      const email = req.userEmail;
+      const email = req.user.email;
 
       user.destroy();
       return res.json({ 'User deleted': { id, email } });
     } catch (e) {
       return res.status(400).json({
-        errors: e.errors.map((err) => err.message),
+        errors: e.errors.map((err: Error) => err.message),
       });
     }
   }
