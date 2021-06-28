@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bookController from '../controllers/Book';
 import loginRequired from '../middlewares/loginRequired';
 
-const router = new Router();
+const router = Router();
 
 router.get('/', bookController.index);
 router.get('/:id', bookController.show);
