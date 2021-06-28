@@ -1,8 +1,10 @@
+import { Request, Response } from 'express';
+import authConfig from '../config/auth';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 
 class TokenController {
-  async create(req, res) {
+  async create(req: Request, res: Response) {
     const { email = '', password = '' } = req.body;
 
     if (!email || !password) {
@@ -26,7 +28,7 @@ class TokenController {
     }
 
     const { id } = user;
-    const token = jwt.sign({ id, email }, process.env.TOKEN_SECRET, {
+    const token = jwt.sign({ id, email }, authConfig.jwt.secret, {
       expiresIn: process.env.TOKEN_EXPIRATION,
     });
 
